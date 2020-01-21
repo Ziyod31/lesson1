@@ -12,3 +12,5 @@
 */
 
 Route::get('/', 'PostController@index');
+Route::get('posts/', 'PostController@index')->name('index');
+Route::get('posts/create', 'PostController@create')->name('post.create');
