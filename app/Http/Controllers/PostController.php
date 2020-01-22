@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PostRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use App\Post;
 
 class PostController extends Controller
@@ -22,7 +25,7 @@ class PostController extends Controller
             ->orderBy('posts.created_at', 'desc')
             ->get();
 
-             return view('index', compact('posts'));
+            return view('index', compact('posts'));
         }
 
 
@@ -48,9 +51,24 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(PostRequest $request)
     {
-        //
+        $post = new Post();
+        $post->title = $request->title;
+        $post->short_title = Str::length($request->title)>30 ? Str::substr($request->title, 0, 30) . '...' : $request->title;
+        $post->descr = $request->descr;
+        $post->author_id = rand(1,4);
+
+        if($request->file('img')){
+            $path = Storage::putFile('public', $request->file('img'));
+            $url = Storage::url($path);
+            $post->image = $url;
+        }
+
+        $post->save();
+
+        return redirect()->route('post.index')->with('success', 'Пост успешно создан !');
+
     }
 
     /**
@@ -61,7 +79,8 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        $post = Post::join('users', 'author_id', '=', 'users.id')->findOrFail($id);
+        return view('posts.show', compact('post'));
     }
 
     /**
@@ -72,7 +91,8 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        //
+        $post = Post::find($id);
+        return view('posts.edit', compact('post'));
     }
 
     /**
@@ -82,9 +102,23 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(PostRequest $request, $id)
     {
-        //
+        $post = Post::find($id);
+        $post->title = $request->title;
+        $post->short_title = Str::length($request->title)>30 ? Str::substr($request->title, 0, 30) . '...' : $request->title;
+        $post->descr = $request->descr;
+
+        if($request->file('img')){
+            $path = Storage::putFile('public', $request->file('img'));
+            $url = Storage::url($path);
+            $post->image = $url;
+        }
+
+        $post->update();
+        $id = $post->post_id;
+        return redirect()->route('post.show', compact('id'))->with('success', 'Пост успешно обновлен !');
+
     }
 
     /**
@@ -95,6 +129,8 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::find($id);
+        $post->delete();
+        return redirect()->route('post.index')->with('success', 'Пост успешно удален !');
     }
 }

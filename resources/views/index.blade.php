@@ -1,4 +1,4 @@
-@extends('layouts.main')
+@extends('layouts.main', ['title' => 'Главная страница'])
 @section('content')
 
 
@@ -8,7 +8,7 @@
  <p class="lead">Всего найдено {{count($posts)}} постов</p>
  @else
  <h2>По запросу <?=$_GET['search'] ?> ничего не найдено !</h2>
- <a href="{{ route('index') }}" class="btn btn-outline-primary">Отоброзить все посты</a>
+ <a href="{{ route('post.index') }}" class="btn btn-outline-primary">Отоброзить все посты</a>
  @endif
  @endif
 
@@ -18,13 +18,14 @@
     <div class="card">
       <div class="card-header"><h2>{{$post->short_title}}</h2></div>
       <div class="card-body">
-        <div class="card-img" style="background-image: url({{ $post->img ?? asset('img/default.jpg') }})">
+        <div class="card-img" style="background-image: url({{ $post->image ?? asset('img/default.jpg') }})">
         </div>
         <div class="card-author"><b>Автор:</b> {{$post->name}}</div>
-        <a href="#" class="btn btn-outline-primary">Посмотреть пост</a>
+        <a href="{{ route('post.show', ['id' => $post->post_id]) }}" class="btn btn-outline-primary">Посмотреть пост</a>
       </div>
     </div>
   </div>
+
   @endforeach
 </div>
 @if(!isset($_GET['search']))
