@@ -14,12 +14,16 @@
         <div class="card-date"><b>Дата:</b> {{ $post->created_at->diffForHumans() }}</div>
         <div class="card-btn">
           <a href="{{ route('post.index') }}" class="btn btn-outline-primary">Главная</a>
+          @auth
+          @if(Auth::user()->id == $post->author_id)
           <a href="{{ route('post.edit', ['id' => $post->post_id]) }}" class="btn btn-outline-warning">Редактировать</a>
           <form action="{{ route('post.destroy', ['id' => $post->post_id]) }}" method="post" onsubmit="if (confirm('Точно удалить пост ?')) { return true } else { return false }">
             @csrf
             @method('DELETE')
             <input type="submit" class="btn btn-outline-danger" value="Удалить">
           </form>
+          @endif
+          @endauth
         </div>
       </div>
     </div>

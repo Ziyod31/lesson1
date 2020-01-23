@@ -11,3 +11,7 @@ Route::get('post/edit/{id}', 'PostController@edit')->name('post.edit');
 Route::post('post/', 'PostController@store')->name('post.store');
 Route::patch('post/{id}', 'PostController@update')->name('post.update');
 Route::delete('post/{id}', 'PostController@destroy')->name('post.destroy');
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

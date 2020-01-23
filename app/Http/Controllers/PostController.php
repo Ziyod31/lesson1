@@ -10,11 +10,12 @@ use App\Post;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
+    function __construct()
+    {
+        $this->middleware('auth')->except('index', 'show');
+    }
+
     public function index(Request $request)
     {
         if ($request->search) {
@@ -57,7 +58,7 @@ class PostController extends Controller
         $post->title = $request->title;
         $post->short_title = Str::length($request->title)>30 ? Str::substr($request->title, 0, 30) . '...' : $request->title;
         $post->descr = $request->descr;
-        $post->author_id = rand(1,4);
+        $post->author_id = \Auth::user()->id;
 
         if($request->file('img')){
             $path = Storage::putFile('public', $request->file('img'));
@@ -92,6 +93,11 @@ class PostController extends Controller
     public function edit($id)
     {
         $post = Post::find($id);
+
+        if($post->author_id != \Auth::user()->id) {
+            return redirect()->route('post.index')->withErrors('У вас нет доступа редактировании этого поста !');
+        }
+
         return view('posts.edit', compact('post'));
     }
 
@@ -105,6 +111,11 @@ class PostController extends Controller
     public function update(PostRequest $request, $id)
     {
         $post = Post::find($id);
+
+        if($post->author_id != \Auth::user()->id) {
+            return redirect()->route('post.index')->withErrors('У вас нет доступа редактировании этого поста !');
+        }
+
         $post->title = $request->title;
         $post->short_title = Str::length($request->title)>30 ? Str::substr($request->title, 0, 30) . '...' : $request->title;
         $post->descr = $request->descr;
@@ -130,6 +141,11 @@ class PostController extends Controller
     public function destroy($id)
     {
         $post = Post::find($id);
+
+        if($post->author_id != \Auth::user()->id) {
+            return redirect()->route('post.index')->withErrors('У вас нет доступа для удаление этого поста !');
+        }
+
         $post->delete();
         return redirect()->route('post.index')->with('success', 'Пост успешно удален !');
     }
